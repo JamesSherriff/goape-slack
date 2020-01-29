@@ -4,6 +4,8 @@ const port = 3002
 const request = require('request');
 const moment = require('moment');
 var bodyParser = require('body-parser');
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: true }));
 const bookings_base_url = 'https://bookings.goape.co.uk/';
 
 app.post('/bookings', function(req, response) {
@@ -18,8 +20,12 @@ function handleBookingsRequest(req, response) {
   var to_date = req.query.to_date || moment().format('YYYY-MM-DD');
   var time = req.query.time;
   var site_name = req.query.site_name;
+  if (!site_name && req.body.team_domain) {
+    if(req.body.team_domain == "Go Ape Coventry") {
+      site_name = "CoombeAbbey";
+    }
+  } 
   var is_slack = req.query.user_id != null;
-  console.log(req.body);
   var slack_text = req.query.text;
   if (slack_text) {
     // This is a slack request so we need to parse slack text params
@@ -42,10 +48,12 @@ function handleBookingsRequest(req, response) {
     if (err) { return console.log(err); }
 
     if(!body.feed) {
-      if (body.head.warnings.feedempty) {
-        // Send response that there are no events on today.
-        response.send([]);
-        return;
+      if (body.head) {
+        if (body.head.warnings.feedempty) {
+          // Send response that there are no events on today.
+          response.send([]);
+          return;
+        }
       }
     }
 
@@ -119,5 +127,4 @@ function handleBookingsRequest(req, response) {
   });
 }
 
-app.use(bodyParser.urlencoded({ extended: true }));
 app.listen(port, () => console.log(`Go Ape Slack listening on port ${port}!`))
