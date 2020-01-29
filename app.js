@@ -21,7 +21,7 @@ function handleBookingsRequest(req, response) {
   var time = req.query.time;
   var site_name = req.query.site_name;
   if (!site_name && req.body.team_domain) {
-    if(req.body.team_domain == "Go Ape Coventry") {
+    if(req.body.team_domain == "sherriffworkspace") {
       site_name = "CoombeAbbey";
     }
   } 
@@ -96,14 +96,18 @@ function handleBookingsRequest(req, response) {
       date_time = "";
       if(req.query.to_date || req.query.from_date) {
         if (req.query.to_date) {
-          date_time += req.query.to_date;
+          date_time += "for " + req.query.to_date;
         }
         else {
-          date_time += req.query.to_date;
+          date_time += "for " + req.query.from_date;
         }
       }
       if (time) {
-        date_time += " at " + time;
+        if (date_time == "") {
+          date_time += "at " + time;
+        else {
+          date_time += " at " + time;
+        }
       }
       if (date_time == "") {
         date_time = "today"
@@ -114,7 +118,7 @@ function handleBookingsRequest(req, response) {
             "type": "section",
             "text": {
               "type": "mrkdwn",
-              "text": "*These are the current bookings for " + date_time + ":*"
+              "text": "*These are the current bookings " + date_time + ":*"
             }
           }
         ]
