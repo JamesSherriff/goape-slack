@@ -33,19 +33,22 @@ function handleBookingsRequest(req, response) {
     // This is a slack request so we need to parse slack text params
     slack_params = slack_text.split(" ");
     if (slack_params[0]) {
-      if (slack_params[1] && /^([0-9]{4}-[0-9]{2}-[0-9]{2})/.test(slack_params[0])) {
+      if (/^([0-9]{4}-[0-9]{2}-[0-9]{2})/.test(slack_params[0])) {
         from_date = slack_params[0];
-        to_date = slack_params[0]
+        to_date = slack_params[0];
+        original_from_date = slack_params[0];
+        original_to_date = slack_params[0];
       }
       else {
         time = slack_params[0];
       }
     }
-    console.log(slack_params[1]);
     if (slack_params[1] && /^([0-9]{4}-[0-9]{2}-[0-9]{2})/.test(slack_params[1])) {
       console.log("matched");
       from_date = slack_params[1];
-      to_date = slack_params[1]
+      to_date = slack_params[1]        
+      original_from_date = slack_params[1];
+      original_to_date = slack_params[1];
     }
   }
 
