@@ -25,8 +25,8 @@ function handleBookingsRequest(req, response) {
       site_name = "CoombeAbbey";
     }
   } 
-  var is_slack = req.query.user_id != null;
-  var slack_text = req.query.text;
+  var is_slack = req.body.user_id != null;
+  var slack_text = req.body.text;
   if (slack_text) {
     // This is a slack request so we need to parse slack text params
     slack_params = slack_text.split(" ");
@@ -48,13 +48,9 @@ function handleBookingsRequest(req, response) {
     if (err) { return console.log(err); }
 
     if(!body.feed) {
-      if (body.head) {
-        if (body.head.warnings.feedempty) {
-          // Send response that there are no events on today.
-          response.send([]);
-          return;
-        }
-      }
+      // Send response that there are no events on today.
+      response.send([]);
+      return;
     }
 
     var event_types = [];
@@ -97,13 +93,28 @@ function handleBookingsRequest(req, response) {
 
     // Send response with names of events and stuff.
     if (is_slack) {
+      date_time = "";
+      if(req.query.to_date || req.query.from_date) {
+        if (req.query.to_date) {
+          date_time += req.query.to_date;
+        }
+        else {
+          date_time += req.query.to_date;
+        }
+      }
+      if (time) {
+        date_time += " at " + time;
+      }
+      if (date_time == "") {
+        date_time = "today"
+      }
       response_data = {
         "blocks": [
           {
             "type": "section",
             "text": {
               "type": "mrkdwn",
-              "text": "*These are the current bookings for today:*"
+              "text": "*These are the current bookings for " + date_time + ":*"
             }
           }
         ]
@@ -114,7 +125,7 @@ function handleBookingsRequest(req, response) {
           "type": "section",
           "text": {
             "type": "mrkdwn",
-            "text": "**" + event_type + "**: " + event_type_events[event_type]
+            "text": "*" + event_type + "*: " + event_type_events[event_type]
           }
         }
         response_data["blocks"].push(activity_data);
