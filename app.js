@@ -16,6 +16,8 @@ app.get('/bookings', function(req, response) {
 });
 
 function handleBookingsRequest(req, response) {
+  var original_from_date = req.query.from_date;
+  var original_to_date = req.query.to_date;
   var from_date = req.query.from_date || moment().format('YYYY-MM-DD');
   var to_date = req.query.to_date || moment().format('YYYY-MM-DD');
   var time = req.query.time;
@@ -31,7 +33,13 @@ function handleBookingsRequest(req, response) {
     // This is a slack request so we need to parse slack text params
     slack_params = slack_text.split(" ");
     if (slack_params[0]) {
-      time = slack_params[0];
+      if (slack_params[1] && /^([0-9]{4}-[0-9]{2}-[0-9]{2})/.test(slack_params[0])) {
+        from_date = slack_params[0];
+        to_date = slack_params[0]
+      }
+      else {
+        time = slack_params[0];
+      }
     }
     console.log(slack_params[1]);
     if (slack_params[1] && /^([0-9]{4}-[0-9]{2}-[0-9]{2})/.test(slack_params[1])) {
@@ -42,6 +50,7 @@ function handleBookingsRequest(req, response) {
   }
 
   var request_url = bookings_base_url + site_name + '/feed/eventsavailability?json&fromdate=' + from_date + '&todate=' + to_date;
+  console.log(request_url);
   request(request_url, {json: true}, (err, res, body) => {
     
 
@@ -49,7 +58,7 @@ function handleBookingsRequest(req, response) {
 
     if(!body.feed) {
       // Send response that there are no events on today.
-      response.send([]);
+      response.send("There aren't any bookings for today.");
       return;
     }
 
@@ -94,17 +103,18 @@ function handleBookingsRequest(req, response) {
     // Send response with names of events and stuff.
     if (is_slack) {
       date_time = "";
-      if(req.query.to_date || req.query.from_date) {
-        if (req.query.to_date) {
-          date_time += "for " + req.query.to_date;
+      if(original_to_date || original_from_date) {
+        if (original_to_date) {
+          date_time += "for " + original_to_date;
         }
         else {
-          date_time += "for " + req.query.from_date;
+          date_time += "for " + original_from_date;
         }
       }
       if (time) {
         if (date_time == "") {
           date_time += "at " + time;
+        }
         else {
           date_time += " at " + time;
         }
