@@ -3,6 +3,7 @@ const app = express()
 const port = 3002
 const request = require('request');
 const moment = require('moment');
+var bodyParser = require('body-parser');
 const bookings_base_url = 'https://bookings.goape.co.uk/';
 
 app.post('/bookings', function(req, response) {
@@ -18,7 +19,7 @@ function handleBookingsRequest(req, response) {
   var time = req.query.time;
   var site_name = req.query.site_name;
   var is_slack = req.query.user_id != null;
-
+  console.log(req.body);
   var slack_text = req.query.text;
   if (slack_text) {
     // This is a slack request so we need to parse slack text params
@@ -26,7 +27,7 @@ function handleBookingsRequest(req, response) {
     if (slack_params[0]) {
       time = slack_params[0];
     }
-    console.log(slack_params[1])
+    console.log(slack_params[1]);
     if (slack_params[1] && /^([0-9]{4}-[0-9]{2}-[0-9]{2})/.test(slack_params[1])) {
       console.log("matched");
       from_date = slack_params[1];
@@ -118,4 +119,5 @@ function handleBookingsRequest(req, response) {
   });
 }
 
+app.use(bodyParser.urlencoded({ extended: true }));
 app.listen(port, () => console.log(`Go Ape Slack listening on port ${port}!`))
