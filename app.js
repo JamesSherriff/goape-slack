@@ -4,12 +4,14 @@ const app = express()
 const port = 3002
 const request = require('request');
 const moment = require('moment');
+const util = require('util')
 var bodyParser = require('body-parser');
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 const bookings_base_url = 'https://bookings.goape.co.uk/';
 const base_url = 'localhost:3002';
 const fs = require('fs');
+var slack_token = "xoxp-912291827186-925100388469-918120196226-c66f95d1ccbf59a5204c6c008f4c9812";
 
 app.post('/bookings', function(req, response) {
   handleBookingsRequest(req, response)
@@ -26,6 +28,34 @@ app.get('/meme/generated', function(req, response) {
 app.post('/meme', function(req, response) {
   generateMeme(req, response);
 });
+app.get('/meme/update', function(req, response) {
+  updateMemes(req, response);
+});
+
+function updateMemes(req, response) {
+  request_url = "https://slack.com/api/users.list?token=" + slack_token;
+  request(request_url, {json: true}, (err, res, body) => {
+    var names = [];
+    if(body.members) {
+      var members = body.members;
+      for(var member in members) {
+        if (members[member].profile) {
+          name = members[member].profile.display_name || members[member].profile.real_name || "";
+          image = members[member].profile.image_512 || "";
+          request.head(image, downloadImage(err, res, body, name, image));
+          names.push(name);
+        }
+      }
+    }
+    response.send("DONE! FOUND: " + names);
+  });
+}
+
+function downloadImage(err, res, body, name, image) {
+  request(image).pipe(fs.createWriteStream("images/memes/" + name + ".jpg")).on('close', function() {
+    console.log("Downloaded - " + name);
+  });
+}
 
 function generateMeme(req, response) {
   if (req.body.text) {
