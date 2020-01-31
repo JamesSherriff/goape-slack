@@ -32,6 +32,20 @@ app.post('/meme', function(req, response) {
 app.get('/meme/update', function(req, response) {
   updateMemes(req, response);
 });
+app.get('/challenge', function(req, response) {
+  function challenge(req, response);
+});
+app.get('/slack', function(req, response) {
+  function handleSlackWebhook(req, response);
+});
+
+function handleSlackWebhook(req, response) {
+  console.log(req.body.event.type);
+)};
+
+function challenge(req, response) {
+  response.send(req.query.challenge);
+};
 
 function updateMemes(req, response) {
   request_url = "https://slack.com/api/users.list?token=" + slack_token;
