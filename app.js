@@ -9,7 +9,7 @@ var bodyParser = require('body-parser');
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 const bookings_base_url = 'https://bookings.goape.co.uk/';
-const base_url = 'localhost:3002';
+const base_url = config.base_url;
 const fs = require('fs');
 var config = require('./config');
 var slack_token = config.slack_token;
@@ -81,7 +81,7 @@ function generateMeme(req, response) {
 
   var meme_output_name = Date.now() + ".jpg";
 
-  command_list = ['images/memes/' + meme_type + ".jpg", "-font", "fonts/impact.ttf", "-fill", "white", "-pointsize", "40", "-stroke", "black", "-strokewidth", "2", "-gravity", "north", "-annotate", "+0+0", top_text];
+  command_list = ['images/memes/' + meme_type + ".jpg", "-font", "fonts/impact.ttf", "-fill", "white", "-pointsize", "50", "-stroke", "black", "-strokewidth", "2", "-gravity", "north", "-annotate", "+0+0", top_text];
   if (bottom_text) {
     command_list.push('-gravity', 'south', '-annotate', '+0+0', bottom_text);
   }
