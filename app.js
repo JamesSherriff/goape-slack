@@ -1,3 +1,4 @@
+const im = require('imagemagick');
 const express = require('express')
 const app = express()
 const port = 3002
@@ -7,6 +8,8 @@ var bodyParser = require('body-parser');
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 const bookings_base_url = 'https://bookings.goape.co.uk/';
+const base_url = 'localhost:3002';
+const fs = require('fs');
 
 app.post('/bookings', function(req, response) {
   handleBookingsRequest(req, response)
@@ -14,6 +17,44 @@ app.post('/bookings', function(req, response) {
 app.get('/bookings', function(req, response) {
   handleBookingsRequest(req, response)
 });
+app.get('/meme', function(req, response) {
+  generateMeme(req, response);
+});
+app.get('/meme/generated', function(req, response) {
+  serveMeme(req, response);
+});
+
+function generateMeme(req, response) {
+  var meme_type = req.query.type;
+  var text = req.query.text;
+  var top_text = text.split(";")[0];
+  var bottom_text = null;
+  if (text.split(";").length > 1) {
+    bottom_text = text.split(";")[1];
+  }
+
+  var meme_output_name = Date.now() + ".jpg";
+
+  //convert Origin-image.jpg -font Impact-Regular -fill white -pointsize 29 -stroke black -strokewidth 2 -gravity south -annotate +0+0 'BLAH BLAH BLAH' Dest-image.jpg
+  command_list = ['images/memes/' + meme_type + ".jpg", "-font", "/home/jsherriff/Downloads/impact.ttf", "-fill", "white", "-pointsize", "40", "-stroke", "black", "-strokewidth", "2", "-gravity", "north", "-annotate", "+0+0", top_text];
+  if (bottom_text) {
+    command_list.push('-gravity', 'south', '-annotate', '+0+0', bottom_text);
+  }
+  command_list.push('images/memes/generated/' + meme_output_name);
+  console.log(command_list);
+  im.convert(command_list, function(err, stdout) {
+    if(err) throw err;
+    response.send(base_url + "/meme/generated?id=" + meme_output_name);
+  });
+}
+
+function serveMeme(req, response) {
+  fs.readFile('images/memes/generated/' + req.query.id, function(err, data) {
+    if(err) throw err;
+    response.set('Content-Type', 'image/jpeg');
+    response.send(data);
+  });
+}
 
 function handleBookingsRequest(req, response) {
   var original_from_date = req.query.from_date;
@@ -44,7 +85,6 @@ function handleBookingsRequest(req, response) {
       }
     }
     if (slack_params[1] && /^([0-9]{4}-[0-9]{2}-[0-9]{2})/.test(slack_params[1])) {
-      console.log("matched");
       from_date = slack_params[1];
       to_date = slack_params[1]        
       original_from_date = slack_params[1];
@@ -53,7 +93,6 @@ function handleBookingsRequest(req, response) {
   }
 
   var request_url = bookings_base_url + site_name + '/feed/eventsavailability?json&fromdate=' + from_date + '&todate=' + to_date;
-  console.log(request_url);
   request(request_url, {json: true}, (err, res, body) => {
     
 
@@ -101,7 +140,6 @@ function handleBookingsRequest(req, response) {
         event_type_events[event.NameAndDate.split(" - ")[0]] += parseInt(event.SoldTickets);
       }
     }
-    console.log(event_type_events);
 
     // Send response with names of events and stuff.
     if (is_slack) {
@@ -126,6 +164,7 @@ function handleBookingsRequest(req, response) {
         date_time = "today"
       }
       response_data = {
+        "response_type": "in_channel",
         "blocks": [
           {
             "type": "section",
