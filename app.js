@@ -58,7 +58,26 @@ function generateMeme(req, response) {
   console.log(command_list);
   im.convert(command_list, function(err, stdout) {
     if(err) throw err;
-    response.send(base_url + "/meme/generated?id=" + meme_output_name);
+    if (req.body.text) {
+      var response_data = {
+        "attachments": [
+          {
+            "fallback": "Memey meme " + meme_output_name,
+            "image_url": base_url + "/meme/generated?id=" + meme_output_name,
+            "thumb_url": base_url + "/meme/generated?id=" + meme_output_name
+          }
+        ]
+      }
+
+      response.send(response_data);
+    }
+    else {
+      fs.readFile('images/memes/generated/' + req.query.id, function(err, data) {
+        if(err) throw err;
+        response.set('Content-Type', 'image/jpeg');
+        response.send(data);
+      });
+    }
   });
 }
 
