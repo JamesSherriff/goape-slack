@@ -49,8 +49,7 @@ function generateMeme(req, response) {
 
   var meme_output_name = Date.now() + ".jpg";
 
-  //convert Origin-image.jpg -font Impact-Regular -fill white -pointsize 29 -stroke black -strokewidth 2 -gravity south -annotate +0+0 'BLAH BLAH BLAH' Dest-image.jpg
-  command_list = ['images/memes/' + meme_type + ".jpg", "-font", "/home/jsherriff/Downloads/impact.ttf", "-fill", "white", "-pointsize", "40", "-stroke", "black", "-strokewidth", "2", "-gravity", "north", "-annotate", "+0+0", top_text];
+  command_list = ['images/memes/' + meme_type + ".jpg", "-font", "fonts/impact.ttf", "-fill", "white", "-pointsize", "40", "-stroke", "black", "-strokewidth", "2", "-gravity", "north", "-annotate", "+0+0", top_text];
   if (bottom_text) {
     command_list.push('-gravity', 'south', '-annotate', '+0+0', bottom_text);
   }
