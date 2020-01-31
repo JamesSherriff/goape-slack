@@ -23,14 +23,28 @@ app.get('/meme', function(req, response) {
 app.get('/meme/generated', function(req, response) {
   serveMeme(req, response);
 });
+app.post('/meme', function(req, response) {
+  generateMeme(req, response);
+});
 
 function generateMeme(req, response) {
-  var meme_type = req.query.type;
-  var text = req.query.text;
-  var top_text = text.split(";")[0];
-  var bottom_text = null;
-  if (text.split(";").length > 1) {
-    bottom_text = text.split(";")[1];
+  if (req.body.text) {
+    var meme_type = req.body.text.split(" ")[0];
+    var text = req.body.text.substring(meme_type.length + 1, req.body.text.length);
+    var top_text = text.split(";")[0];
+    var bottom_text = null;
+    if (text.split(";").length > 1) {
+      bottom_text = text.split(";")[1];
+    }
+  }
+  else {
+    var meme_type = req.query.type;
+    var text = req.query.text;
+    var top_text = text.split(";")[0];
+    var bottom_text = null;
+    if (text.split(";").length > 1) {
+      bottom_text = text.split(";")[1];
+    }
   }
 
   var meme_output_name = Date.now() + ".jpg";
