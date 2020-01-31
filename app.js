@@ -11,7 +11,8 @@ app.use(bodyParser.urlencoded({ extended: true }));
 const bookings_base_url = 'https://bookings.goape.co.uk/';
 const base_url = 'localhost:3002';
 const fs = require('fs');
-var slack_token = "xoxp-912291827186-925100388469-918120196226-c66f95d1ccbf59a5204c6c008f4c9812";
+var config = require('./config');
+var slack_token = config.slack_token;
 
 app.post('/bookings', function(req, response) {
   handleBookingsRequest(req, response)
@@ -41,6 +42,7 @@ function updateMemes(req, response) {
       for(var member in members) {
         if (members[member].profile) {
           name = members[member].profile.display_name || members[member].profile.real_name || "";
+          name = name.replace(/ /g, "");
           image = members[member].profile.image_512 || "";
           request.head(image, downloadImage(err, res, body, name, image));
           names.push(name);
